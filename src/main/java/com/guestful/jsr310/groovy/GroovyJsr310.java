@@ -15,53 +15,23 @@
  */
 package com.guestful.jsr310.groovy;
 
-import com.guestful.json.groovy.CustomizableJsonOutput;
-import com.guestful.jsr310.Jsr310Extensions;
+import com.guestful.json.groovy.GroovyJsonSerializer;
 import com.guestful.jsr310.ZonedInterval;
 
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
+import java.time.ZonedDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import static java.time.temporal.ChronoField.*;
 
 /**
  * @author Mathieu Carbou (mathieu.carbou@gmail.com)
  */
 public class GroovyJsr310 {
-
-    private static final DateTimeFormatter ISO_OFFSET_DATE_TIME = new DateTimeFormatterBuilder()
-        .parseCaseInsensitive()
-        .append(DateTimeFormatter.ISO_LOCAL_DATE)
-        .appendLiteral('T')
-        .appendValue(HOUR_OF_DAY, 2)
-        .appendLiteral(':')
-        .appendValue(MINUTE_OF_HOUR, 2)
-        .appendLiteral(':')
-        .appendValue(SECOND_OF_MINUTE, 2)
-        .appendFraction(MILLI_OF_SECOND, 3, 3, true)
-        .appendOffsetId()
-        .toFormatter();
-
-    public static void addJsr310EncodingHook(CustomizableJsonOutput output) {
-        output.addHookString(LocalTime.class)
-            .addHook(DayOfWeek.class, (o, buffer, outputer) -> buffer.addQuoted(Jsr310Extensions.getShortName(o)))
-            .addHook(Month.class, (o, buffer, outputer) -> buffer.addQuoted(Jsr310Extensions.getShortName(o)))
-            .addHook(ZoneId.class, (o, buffer, outputer) -> buffer.addQuoted(o.getId()))
-            .addHook(LocalDate.class, (o, buffer, outputer) -> buffer.addQuoted(o.toString()))
-            .addHook(LocalTime.class, (o, buffer, outputer) -> buffer.addQuoted(o.toString()))
-            .addHook(OffsetDateTime.class, (o, buffer, outputer) -> buffer.addQuoted(o.format(ISO_OFFSET_DATE_TIME)))
-            .addHook(ZonedDateTime.class, (o, buffer, outputer) -> buffer.addQuoted(o.toOffsetDateTime().format(ISO_OFFSET_DATE_TIME)))
-            .addHook(Duration.class, (o, buffer, outputer) -> outputer.writeNumber(Long.class, o.toMillis(), buffer))
-            .addHook(Period.class, (o, buffer, outputer) -> outputer.writeNumber(Long.class, Jsr310Extensions.toDuration(o).toMillis(), buffer))
-            .addHook(ZonedInterval.class, (o, buffer, outputer) -> {
-                Map<String, ZonedDateTime> map = new LinkedHashMap<>();
-                map.put("start", o.getStart());
-                map.put("end", o.getEnd());
-                outputer.writeMap(map, buffer);
-            });
+    public static void addJsr310EncodingHook(GroovyJsonSerializer serializer) {
+        serializer.addCustomSerializer(ZonedInterval.class, (o, writer) -> {
+            Map<String, ZonedDateTime> map = new LinkedHashMap<>();
+            map.put("start", o.getStart());
+            map.put("end", o.getEnd());
+            writer.writeMap(map);
+        });
     }
-
 }
