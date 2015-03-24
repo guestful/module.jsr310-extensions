@@ -17,7 +17,6 @@ package com.guestful.jsr310;
 
 import java.io.Serializable;
 import java.time.*;
-import java.util.*;
 
 /**
  * @author Mathieu Carbou (mathieu.carbou@gmail.com)
@@ -331,46 +330,6 @@ public class ZonedInterval implements Serializable {
 
     public ZonedInterval enlarge(Duration d) {
         return ZonedInterval.of(start.minus(d), end.plus(d));
-    }
-
-    public List<ZonedDateTime> getDateTimes() {
-        List<ZonedDateTime> days = new ArrayList<>();
-        ZonedDateTime start = this.start;
-        while (start.isBefore(this.end)) {
-            days.add(start);
-            start = start.plusDays(1);
-        }
-        return days;
-    }
-
-    public List<ZonedDateTime> getDateTimesForDayOfWeek(Collection<DayOfWeek> daysOfWeek) {
-        daysOfWeek = new HashSet<>(daysOfWeek);
-        if (daysOfWeek.size() == 0) return Collections.emptyList();
-        if (daysOfWeek.size() == 7) return getDateTimes();
-        List<ZonedDateTime> days = new ArrayList<>();
-        ZonedDateTime start = this.start;
-        while (start.isBefore(this.end)) {
-            if (daysOfWeek.contains(start.getDayOfWeek())) {
-                days.add(start);
-            }
-            start = start.plusDays(1);
-        }
-        return days;
-    }
-
-    public List<ZonedDateTime> getDateTimesForDayOfMonth(Collection<Integer> daysOfMonth) {
-        daysOfMonth = new HashSet<>(daysOfMonth);
-        if (daysOfMonth.size() == 0) return Collections.emptyList();
-        if (daysOfMonth.size() == 31) return getDateTimes();
-        List<ZonedDateTime> days = new ArrayList<>();
-        ZonedDateTime start = this.start;
-        while (start.isBefore(this.end)) {
-            if (daysOfMonth.contains(start.getDayOfMonth())) {
-                days.add(start);
-            }
-            start = start.plusDays(1);
-        }
-        return days;
     }
 
     /**
