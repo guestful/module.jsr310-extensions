@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2013 Guestful (info@guestful.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@ package com.guestful.jsr310;
 
 import java.io.Serializable;
 import java.time.*;
+import java.util.Objects;
 
 /**
  * @author Mathieu Carbou (mathieu.carbou@gmail.com)
@@ -35,9 +36,25 @@ public class ZonedInterval implements Serializable {
     private final ZoneId zoneId;
 
     private ZonedInterval(ZonedDateTime start, ZonedDateTime end) {
+        this.start = Objects.requireNonNull(start, "start cannot be null");
         this.zoneId = start.getZone();
-        this.start = start;
-        this.end = end.withZoneSameInstant(zoneId);
+        this.end = Objects.requireNonNull(end, "end cannot be null").withZoneSameInstant(zoneId);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ZonedInterval that = (ZonedInterval) o;
+        return start.equals(that.start) && end.equals(that.end) && zoneId.equals(that.zoneId);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = start.hashCode();
+        result = 31 * result + end.hashCode();
+        result = 31 * result + zoneId.hashCode();
+        return result;
     }
 
     public ZoneId getZone() {
